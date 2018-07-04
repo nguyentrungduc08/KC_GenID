@@ -40,13 +40,19 @@ OBJECTFILES= \
 	${OBJECTDIR}/src/kc_genid_types.o \
 	${OBJECTDIR}/src/main.o
 
+# Test Directory
+TESTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}/tests
+
+# Test Files
+TESTFILES= \
+	${TESTDIR}/TestFiles/f1
 
 # C Compiler Flags
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=
-CXXFLAGS=
+CCFLAGS=-std=c++11
+CXXFLAGS=-std=c++11
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -87,6 +93,80 @@ ${OBJECTDIR}/src/main.o: src/main.cpp
 
 # Subprojects
 .build-subprojects:
+
+# Build Test Targets
+.build-tests-conf: .build-conf ${TESTFILES}
+${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/login.o ${OBJECTFILES:%.o=%_nomain.o}
+	${MKDIR} -p ${TESTDIR}/TestFiles
+	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} 
+
+
+${TESTDIR}/tests/login.o: tests/login.cpp 
+	${MKDIR} -p ${TESTDIR}/tests
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -I/usr/local/include/boost -I/usr/local/include/thrift -I. -MMD -MP -MF "$@.d" -o ${TESTDIR}/tests/login.o tests/login.cpp
+
+
+${OBJECTDIR}/src/KC_GenID_nomain.o: ${OBJECTDIR}/src/KC_GenID.o src/KC_GenID.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/KC_GenID.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -g -I/usr/local/include/boost -I/usr/local/include/thrift -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/KC_GenID_nomain.o src/KC_GenID.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/KC_GenID.o ${OBJECTDIR}/src/KC_GenID_nomain.o;\
+	fi
+
+${OBJECTDIR}/src/kc_genid_constants_nomain.o: ${OBJECTDIR}/src/kc_genid_constants.o src/kc_genid_constants.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/kc_genid_constants.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -g -I/usr/local/include/boost -I/usr/local/include/thrift -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/kc_genid_constants_nomain.o src/kc_genid_constants.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/kc_genid_constants.o ${OBJECTDIR}/src/kc_genid_constants_nomain.o;\
+	fi
+
+${OBJECTDIR}/src/kc_genid_types_nomain.o: ${OBJECTDIR}/src/kc_genid_types.o src/kc_genid_types.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/kc_genid_types.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -g -I/usr/local/include/boost -I/usr/local/include/thrift -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/kc_genid_types_nomain.o src/kc_genid_types.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/kc_genid_types.o ${OBJECTDIR}/src/kc_genid_types_nomain.o;\
+	fi
+
+${OBJECTDIR}/src/main_nomain.o: ${OBJECTDIR}/src/main.o src/main.cpp 
+	${MKDIR} -p ${OBJECTDIR}/src
+	@NMOUTPUT=`${NM} ${OBJECTDIR}/src/main.o`; \
+	if (echo "$$NMOUTPUT" | ${GREP} '|main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T main$$') || \
+	   (echo "$$NMOUTPUT" | ${GREP} 'T _main$$'); \
+	then  \
+	    ${RM} "$@.d";\
+	    $(COMPILE.cc) -g -I/usr/local/include/boost -I/usr/local/include/thrift -Dmain=__nomain -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main_nomain.o src/main.cpp;\
+	else  \
+	    ${CP} ${OBJECTDIR}/src/main.o ${OBJECTDIR}/src/main_nomain.o;\
+	fi
+
+# Run Test Targets
+.test-conf:
+	@if [ "${TEST}" = "" ]; \
+	then  \
+	    ${TESTDIR}/TestFiles/f1 || true; \
+	else  \
+	    ./${TEST} || true; \
+	fi
 
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}

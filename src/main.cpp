@@ -10,6 +10,7 @@
 
 //Kyoto Cabinet database
 #include <kchashdb.h>
+#include <thrift/TToString.h>
 
 using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
@@ -47,18 +48,78 @@ public:
 
     void genId(Z_idGen& _return, const std::string& idType) {
         // Your implementation goes here
-        
+        int32_t isExistKey =  this->db.check(idType);
+        if (isExistKey > -1){
+            int64_t id = 1;
+            std::string sId = std::to_string(id);
+            this->db.set(idType,sId);
+            KC_GenID::Z_idGen result;
+            result.errorCode = 0;
+            result.data = id;
+            _return =  result;
+        } else {
+            int64_t id;
+            std::string sId;
+            this->db.get(idType, &sId);
+            id = std::stoi(sId);
+            ++id;
+            sId = std::to_string(id);
+            this->db.set(idType,sId);
+            KC_GenID::Z_idGen result;
+            result.errorCode = 0;
+            result.data = id;
+            _return =  result;
+        }
         printf("genId\n");
     
     }
 
     void getRangeId(Z_rangeId& _return, const std::string& idType, const int64_t rangeId) {
         // Your implementation goes here
+        int32_t isExistKey =  this->db.check(idType);
+        if (isExistKey < 0){
+            int64_t id = rangeId;
+            std::string sId = std::to_string(id);
+            this->db.set(idType,sId);
+            KC_GenID::Z_rangeId result;
+            result.errorCode = 0;
+            result.data = id;
+            _return =  result;
+        } else {
+            int64_t id;
+            std::string sId;
+            this->db.get(idType, &sId);
+            id = std::stoi(sId);
+            id+=rangeId;
+            sId = std::to_string(id);
+            this->db.set(idType,sId);
+            KC_GenID::Z_rangeId result;
+            result.errorCode = 0;
+            result.data = id;
+            _return =  result;
+        }
         printf("getRangeId\n");
     }
 
     void getIdValue(Z_idValue& _return, const std::string& idType) {
         // Your implementation goes here
+        int32_t isExistKey =  this->db.check(idType);
+        if (isExistKey < 0){
+            int64_t id  = 0;
+            KC_GenID::Z_idValue result;
+            result.errorCode = 0;
+            result.data = id;
+            _return =  result;
+        } else {
+            int64_t id;
+            std::string sId;
+            this->db.get(idType, &sId);
+            id = std::stoi(sId);
+            KC_GenID::Z_idValue result;
+            result.errorCode = 0;
+            result.data = id;
+            _return =  result;
+        }
         printf("getIdValue\n");
     }
 
