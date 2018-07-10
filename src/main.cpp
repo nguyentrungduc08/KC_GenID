@@ -8,6 +8,18 @@
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
 
+#include "Poco/Util/Application.h"
+#include "Poco/Util/Option.h"
+#include "Poco/Util/OptionSet.h"
+#include "Poco/Util/HelpFormatter.h"
+#include "Poco/Util/AbstractConfiguration.h"
+
+#include "Poco/Notification.h"
+#include "Poco/NotificationQueue.h"
+#include "Poco/ThreadPool.h"
+#include "Poco/Runnable.h"
+#include "Poco/AutoPtr.h"
+
 //Kyoto Cabinet database
 #include <kchashdb.h>
 #include <thrift/TToString.h>
@@ -20,6 +32,13 @@ using namespace ::apache::thrift::server;
 using boost::shared_ptr;
 using namespace kyotocabinet;
 using namespace  ::KC_GenID;
+
+using Poco::Util::Application;
+using Poco::Util::Option;
+using Poco::Util::OptionSet;
+using Poco::Util::HelpFormatter;
+using Poco::Util::AbstractConfiguration;
+using Poco::Util::OptionCallback;
 
 class KC_GenIDHandler : virtual public KC_GenIDIf {
 private:
@@ -49,7 +68,7 @@ public:
     void genId(Z_idGen& _return, const std::string& idType) {
         // Your implementation goes here
         int32_t isExistKey =  this->db.check(idType);
-        if (isExistKey > -1){
+        if (isExistKey < 0){
             int64_t id = 1;
             std::string sId = std::to_string(id);
             this->db.set(idType,sId);
@@ -125,16 +144,111 @@ public:
 
 };
 
-int main(int argc, char **argv) {
-    int port = 6789;
-    shared_ptr<KC_GenIDHandler> handler(new KC_GenIDHandler());
-    shared_ptr<TProcessor> processor(new KC_GenIDProcessor(handler));
-    shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
-    shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
-    shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+class ZGenIDService : public Application {
+public:
 
-    TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
-    server.serve();
-    return 0;
-}
+    ZGenIDService() : _helpRequested(false) {
+        std::cout << "Start POCO Application Storage service..." << std::endl;
+    }
+
+protected:
+
+    void 
+    initialize(Application& self) {
+        loadConfiguration(); // load default configuration files, if present
+        Application::initialize(self);
+        // add your own initialization code here
+    }
+
+    void 
+    uninitialize() {
+        // add your own uninitialization code here
+        Application::uninitialize();
+    }
+
+    void 
+    reinitialize(Application& self) {
+        Application::reinitialize(self);
+        // add your own reinitialization code here
+    }
+
+    void 
+    defineOptions(OptionSet& options) {
+        Application::defineOptions(options);
+
+        options.addOption(
+                Option("help", "h", "display help information on command line arguments")
+                .required(false)
+                .repeatable(false)
+                .callback(OptionCallback<ZGenIDService>(this, &ZGenIDService::handleHelp)));
+
+        options.addOption(
+                Option("bind", "b", "bind option value to test.property")
+                .required(false)
+                .repeatable(false)
+                .argument("value")
+                .binding("test.property"));
+    }
+
+    void 
+    handleHelp(const std::string& name, const std::string& value) {
+        _helpRequested = true;
+        displayHelp();
+        stopOptionsProcessing();
+    }
+
+    void 
+    displayHelp() {
+        HelpFormatter helpFormatter(options());
+        helpFormatter.setCommand(commandName());
+        helpFormatter.setUsage("OPTIONS");
+        helpFormatter.setHeader("A sample application that demonstrates some of the features of the Poco::Util::Application class.");
+        helpFormatter.format(std::cout);
+    }
+
+    int 
+    main(const ArgVec& args) {
+        std::cout << "begin main" << std::endl;
+        if (!_helpRequested) {
+            runService();
+
+        }
+        return Application::EXIT_OK;
+    }
+
+private:
+    bool        _helpRequested;
+    int         _port;
+    std::string _host;
+    
+    void 
+    runService(){
+        int port = 6789;
+        shared_ptr<KC_GenIDHandler> handler(new KC_GenIDHandler());
+        shared_ptr<TProcessor> processor(new KC_GenIDProcessor(handler));
+        shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
+        shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
+        shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+
+        TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+        server.serve();
+        return;
+    }
+};
+
+POCO_APP_MAIN(ZGenIDService)
+
+
+//int main(int argc, char **argv) {
+//    int port = 6789;
+//    shared_ptr<KC_GenIDHandler> handler(new KC_GenIDHandler());
+//    shared_ptr<TProcessor> processor(new KC_GenIDProcessor(handler));
+//    shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
+//    shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
+//    shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+//
+//    TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+//    server.serve();
+//    return 0;
+//}
 

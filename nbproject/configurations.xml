@@ -30,6 +30,12 @@
                      kind="TEST">
         <itemPath>tests/login.cpp</itemPath>
       </logicalFolder>
+      <logicalFolder name="f2"
+                     displayName="loginTest"
+                     projectFiles="true"
+                     kind="TEST">
+        <itemPath>tests/testGenId.cpp</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -55,7 +61,7 @@
           <commandLine>-std=c++11</commandLine>
         </ccTool>
         <linkerTool>
-          <commandLine>-lthrift -lthriftnb -levent -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc</commandLine>
+          <commandLine>-lthrift -lthriftnb -levent -lkyotocabinet -lz -lstdc++ -lrt -lpthread -lm -lc -lPocoUtil -lPocoXML -lPocoJSON -lPocoNet -lPocoFoundation</commandLine>
         </linkerTool>
       </compileType>
       <folder path="TestFiles/f1">
@@ -75,9 +81,15 @@
       </folder>
       <folder path="TestFiles/f2">
         <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
           <commandLine>`cppunit-config --cflags`</commandLine>
         </cTool>
         <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
           <commandLine>`cppunit-config --cflags`</commandLine>
         </ccTool>
         <linkerTool>
@@ -102,6 +114,8 @@
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/login.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/testGenId.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -141,9 +155,15 @@
       </folder>
       <folder path="TestFiles/f2">
         <cTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
           <commandLine>`cppunit-config --cflags`</commandLine>
         </cTool>
         <ccTool>
+          <incDir>
+            <pElem>.</pElem>
+          </incDir>
           <commandLine>`cppunit-config --cflags`</commandLine>
         </ccTool>
         <linkerTool>
@@ -168,6 +188,8 @@
       <item path="src/main.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="tests/login.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="tests/testGenId.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>
