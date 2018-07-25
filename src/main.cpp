@@ -5,8 +5,16 @@
 #include "KC_GenID.h"
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
+#include <thrift/server/TNonblockingServer.h>
+#include <thrift/server/TThreadPoolServer.h>
+#include <thrift/server/TThreadedServer.h>
 #include <thrift/transport/TServerSocket.h>
 #include <thrift/transport/TBufferTransports.h>
+#include <thrift/transport/TSocket.h>  
+#include <thrift/transport/TServerSocket.h>
+#include <thrift/concurrency/PosixThreadFactory.h>
+#include <thrift/transport/TBufferTransports.h>
+#include <thrift/transport/TTransportUtils.h>
 
 #include "Poco/Util/Application.h"
 #include "Poco/Util/Option.h"
@@ -28,6 +36,7 @@ using namespace ::apache::thrift;
 using namespace ::apache::thrift::protocol;
 using namespace ::apache::thrift::transport;
 using namespace ::apache::thrift::server;
+using namespace ::apache::thrift::concurrency;
 
 using boost::shared_ptr;
 using namespace kyotocabinet;
@@ -224,13 +233,33 @@ private:
     void 
     runService(){
         int port = 6789;
-        shared_ptr<KC_GenIDHandler> handler(new KC_GenIDHandler());
-        shared_ptr<TProcessor> processor(new KC_GenIDProcessor(handler));
-        shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
-        shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
-        shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
+        shared_ptr<KC_GenIDHandler>     handler(new KC_GenIDHandler());
+        shared_ptr<TProcessor>          processor(new KC_GenIDProcessor(handler));
+        shared_ptr<TServerTransport>    serverTransport(new TServerSocket(port));
+        shared_ptr<TTransportFactory>   transportFactory(new TBufferedTransportFactory());
+        shared_ptr<TProtocolFactory>    protocolFactory(new TBinaryProtocolFactory());
 
         TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
+        server.serve();
+        return;
+    }
+    
+    void
+    runTNonblockingService() {
+        std::cout << "runTNonblockingServer" << std::endl;
+        int port = 6789;
+        shared_ptr<KC_GenIDHandler>     handler(new KC_GenIDHandler());
+        shared_ptr<TProcessor>          processor(new KC_GenIDProcessor(handler));
+        shared_ptr<TServerTransport>    serverTransport(new TServerSocket(port));
+        shared_ptr<TTransportFactory>   transportFactory(new TBufferedTransportFactory());
+        shared_ptr<TProtocolFactory>    protocolFactory(new TBinaryProtocolFactory());
+
+        shared_ptr<ThreadManager> threadManager         = ThreadManager::newSimpleThreadManager(8);
+        shared_ptr<PosixThreadFactory> threadFactory    = shared_ptr<PosixThreadFactory>(new PosixThreadFactory());
+        threadManager->threadFactory(threadFactory);
+        threadManager->start();
+
+        TNonblockingServer server(processor, protocolFactory, port, threadManager);
         server.serve();
         return;
     }
