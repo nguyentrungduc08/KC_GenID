@@ -21,7 +21,7 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-Linux-x86
+CND_PLATFORM=GNU-Linux
 CND_DLIB_EXT=so
 CND_CONF=Release
 CND_DISTDIR=dist
@@ -48,6 +48,11 @@ TESTFILES= \
 	${TESTDIR}/TestFiles/f1 \
 	${TESTDIR}/TestFiles/f2
 
+# Test Object Files
+TESTOBJECTFILES= \
+	${TESTDIR}/tests/login.o \
+	${TESTDIR}/tests/testGenId.o
+
 # C Compiler Flags
 CFLAGS=
 
@@ -72,22 +77,22 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/kc_genid: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/kc_genid ${OBJECTFILES} ${LDLIBSOPTIONS}
 
-${OBJECTDIR}/src/KC_GenID.o: src/KC_GenID.cpp 
+${OBJECTDIR}/src/KC_GenID.o: src/KC_GenID.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/KC_GenID.o src/KC_GenID.cpp
 
-${OBJECTDIR}/src/kc_genid_constants.o: src/kc_genid_constants.cpp 
+${OBJECTDIR}/src/kc_genid_constants.o: src/kc_genid_constants.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/kc_genid_constants.o src/kc_genid_constants.cpp
 
-${OBJECTDIR}/src/kc_genid_types.o: src/kc_genid_types.cpp 
+${OBJECTDIR}/src/kc_genid_types.o: src/kc_genid_types.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/kc_genid_types.o src/kc_genid_types.cpp
 
-${OBJECTDIR}/src/main.o: src/main.cpp 
+${OBJECTDIR}/src/main.o: src/main.cpp
 	${MKDIR} -p ${OBJECTDIR}/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/main.o src/main.cpp
@@ -96,14 +101,16 @@ ${OBJECTDIR}/src/main.o: src/main.cpp
 .build-subprojects:
 
 # Build Test Targets
-.build-tests-conf: .build-conf ${TESTFILES}
+.build-tests-conf: .build-tests-subprojects .build-conf ${TESTFILES}
+.build-tests-subprojects:
+
 ${TESTDIR}/TestFiles/f1: ${TESTDIR}/tests/login.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc}   -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS} 
+	${LINK.cc} -o ${TESTDIR}/TestFiles/f1 $^ ${LDLIBSOPTIONS}   
 
 ${TESTDIR}/TestFiles/f2: ${TESTDIR}/tests/testGenId.o ${OBJECTFILES:%.o=%_nomain.o}
 	${MKDIR} -p ${TESTDIR}/TestFiles
-	${LINK.cc}   -o ${TESTDIR}/TestFiles/f2 $^ ${LDLIBSOPTIONS} `cppunit-config --libs`   
+	${LINK.cc} -o ${TESTDIR}/TestFiles/f2 $^ ${LDLIBSOPTIONS}   `cppunit-config --libs`   
 
 
 ${TESTDIR}/tests/login.o: tests/login.cpp 
@@ -183,7 +190,6 @@ ${OBJECTDIR}/src/main_nomain.o: ${OBJECTDIR}/src/main.o src/main.cpp
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/kc_genid
 
 # Subprojects
 .clean-subprojects:

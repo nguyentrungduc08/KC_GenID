@@ -219,8 +219,8 @@ protected:
     main(const ArgVec& args) {
         std::cout << "begin main" << std::endl;
         if (!_helpRequested) {
-            runService();
-
+//            runService();
+            runTNonblockingService();
         }
         return Application::EXIT_OK;
     }
@@ -266,18 +266,4 @@ private:
 };
 
 POCO_APP_MAIN(ZGenIDService)
-
-
-//int main(int argc, char **argv) {
-//    int port = 6789;
-//    shared_ptr<KC_GenIDHandler> handler(new KC_GenIDHandler());
-//    shared_ptr<TProcessor> processor(new KC_GenIDProcessor(handler));
-//    shared_ptr<TServerTransport> serverTransport(new TServerSocket(port));
-//    shared_ptr<TTransportFactory> transportFactory(new TBufferedTransportFactory());
-//    shared_ptr<TProtocolFactory> protocolFactory(new TBinaryProtocolFactory());
-//
-//    TSimpleServer server(processor, serverTransport, transportFactory, protocolFactory);
-//    server.serve();
-//    return 0;
-//}
 
